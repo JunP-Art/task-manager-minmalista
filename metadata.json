@@ -1,0 +1,5 @@
+{
+  "name": "Task Manager Minimalista",
+  "description": "Una aplicación web de gestión de tareas minimalista y funcional inspirada en Microsoft To Do.",
+  "requestFramePermissions": []
+}
