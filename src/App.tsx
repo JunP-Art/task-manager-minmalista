@@ -20,6 +20,19 @@ export default function App() {
   const [newTaskInterval, setNewTaskInterval] = useState<number>(15);
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [toast, setToast] = useState<{ id: string; title: string } | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState<string>('default');
+
+  // Registrar Service Worker y comprobar permisos
+  useEffect(() => {
+    if ('Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.error('Service Worker registration failed:', err);
+      });
+    }
+  }, []);
 
   // Cargar tareas desde localStorage al iniciar
   useEffect(() => {
@@ -53,6 +66,29 @@ export default function App() {
               hasChanges = true;
               // Mostrar la notificación (toast)
               setToast({ id: crypto.randomUUID(), title: task.title });
+              
+              // Mostrar notificación nativa (OS)
+              if ('Notification' in window && Notification.permission === 'granted') {
+                const title = 'Recordatorio de Tarea';
+                const options = {
+                  body: task.title,
+                  icon: 'https://fav.farm/🔔',
+                  vibrate: [200, 100, 200],
+                  tag: task.id,
+                  requireInteraction: true
+                };
+
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification(title, options);
+                  }).catch(() => {
+                    new Notification(title, options);
+                  });
+                } else {
+                  new Notification(title, options);
+                }
+              }
+              
               return { ...task, lastNotifiedAt: now };
             }
           }
@@ -93,6 +129,23 @@ export default function App() {
     setTasks([newTask, ...tasks]);
     setNewTaskTitle('');
     setNewTaskType('indefinite'); // Resetear a por defecto
+  };
+
+  // Manejar la selección de prioridad y pedir permisos
+  const handleSetPriority = async () => {
+    setNewTaskType('priority');
+    if ('Notification' in window) {
+      if (Notification.permission === 'default') {
+        try {
+          const perm = await Notification.requestPermission();
+          setNotificationPermission(perm);
+        } catch (e) {
+          console.error('Error al pedir permisos:', e);
+        }
+      } else {
+        setNotificationPermission(Notification.permission);
+      }
+    }
   };
 
   // Manejar el clic en el botón de completar
@@ -214,7 +267,7 @@ export default function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setNewTaskType('priority')}
+                  onClick={handleSetPriority}
                   className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center ${
                     newTaskType === 'priority' 
                       ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' 
@@ -241,6 +294,13 @@ export default function App() {
                     <option value={25}>25 min</option>
                     <option value={30}>30 min</option>
                   </select>
+                </div>
+              )}
+
+              {newTaskType === 'priority' && notificationPermission === 'denied' && (
+                <div className="w-full mt-2 text-xs text-red-500 dark:text-red-400 flex items-center bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
+                  <X className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+                  Permisos de notificación denegados en tu navegador. Habilítalos en la configuración del sitio.
                 </div>
               )}
             </div>
