@@ -175,7 +175,7 @@ export default function App() {
         {/* Sección de Entrada */}
         <div className="sticky top-0 z-10 bg-gray-50/95 dark:bg-zinc-900/95 backdrop-blur-md pt-2 pb-4 sm:static sm:bg-transparent sm:backdrop-blur-none sm:p-0 sm:mb-8">
           <form onSubmit={handleAddTask} className="bg-white dark:bg-zinc-800 shadow-sm rounded-xl overflow-hidden border border-gray-100 dark:border-zinc-700/50 transition-all focus-within:ring-2 focus-within:ring-indigo-500 dark:focus-within:ring-indigo-400">
-            <div className="relative">
+            <div className="relative flex items-center">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Plus className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
@@ -184,8 +184,17 @@ export default function App() {
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 placeholder="Añadir una tarea"
-                className="block w-full pl-11 pr-4 py-3.5 sm:py-4 bg-transparent border-0 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base sm:text-lg outline-none focus:ring-0"
+                className="block w-full pl-11 pr-24 sm:pr-28 py-3.5 sm:py-4 bg-transparent border-0 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base sm:text-lg outline-none focus:ring-0"
               />
+              <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
+                <button
+                  type="submit"
+                  disabled={!newTaskTitle.trim()}
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 dark:disabled:bg-zinc-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  Añadir
+                </button>
+              </div>
             </div>
             
             {/* Opciones de la tarea */}
@@ -234,8 +243,6 @@ export default function App() {
                   </select>
                 </div>
               )}
-              
-              <button type="submit" className="hidden">Añadir</button>
             </div>
           </form>
         </div>
